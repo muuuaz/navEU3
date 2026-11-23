@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#071525">
+<meta name="description" content="Dashboard navigasi, GPS speedometer, dan mode layar portrait/landscape naviXU3">
+<title>naviXU3 | naviXU3 · Hacker Command Center</title>
+<style>
+:root{--bg:#061321;--panel:#0d2034;--panel2:#102943;--line:#1e405d;--blue:#35aaff;--cyan:#67d7ff;--muted:#9ab0c5;--white:#eef7ff;--green:#39d99a;--red:#ff6878}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 70% -20%,#12385a 0,transparent 48%),var(--bg);color:var(--white);font:15px system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+button,input{font:inherit}button{cursor:pointer;border:1px solid #285274;background:#12314d;color:var(--white);border-radius:12px;padding:11px 14px;font-weight:650}button:hover{border-color:var(--cyan);background:#174064}button.primary{background:linear-gradient(135deg,#087bc7,#1555a2);border:0}button.danger{border-color:#7d3443;background:#3b1c2b}button:disabled{opacity:.45;cursor:not-allowed}
+header{position:sticky;top:0;z-index:5;background:#071525ed;backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:12px max(16px,env(safe-area-inset-right)) 12px max(16px,env(safe-area-inset-left));display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.08em}.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(145deg,#38c8ff,#0755a5);display:grid;place-items:center;font-size:20px}.sub{font-size:10px;color:var(--muted);letter-spacing:.16em}.header-right{display:flex;align-items:center;gap:10px}.clock{text-align:right;font-variant-numeric:tabular-nums}.clock strong{font-size:20px}.clock small{display:block;color:var(--muted)}
+main{max-width:1280px;margin:auto;padding:18px 16px 100px}.statusbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.pill{border:1px solid var(--line);border-radius:99px;padding:7px 11px;color:var(--muted);font-size:12px;display:flex;align-items:center;gap:7px}.dot{width:7px;height:7px;border-radius:50%;background:#71879b}.dot.ok{background:var(--green);box-shadow:0 0 9px #39d99a}
+.grid{display:grid;grid-template-columns:1.45fr 1fr;gap:14px}.card{background:linear-gradient(145deg,#10263b,#0a1b2d);border:1px solid var(--line);border-radius:18px;padding:16px;min-width:0;box-shadow:0 12px 30px #0002}.card h2{font-size:15px;margin:0 0 13px;letter-spacing:.04em}.muted{color:var(--muted)}.mapframe{width:100%;height:290px;border:0;border-radius:12px;background:#132b40}.mapactions,.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.mapsearch{display:flex;gap:8px}.mapsearch input,.musicform input{min-width:0;flex:1;background:#071727;border:1px solid var(--line);border-radius:11px;color:white;padding:11px}
+.speedwrap{display:flex;align-items:center;justify-content:center;min-height:180px;position:relative}.speed{font-size:clamp(62px,10vw,92px);font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.06em}.unit{color:var(--cyan);font-size:13px;letter-spacing:.18em}.speedmeta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.metric{background:#0a1a2b;border:1px solid #1b3852;border-radius:12px;padding:11px}.metric small{display:block;color:var(--muted);font-size:11px}.metric strong{display:block;margin-top:4px;font-size:17px;font-variant-numeric:tabular-nums}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.video{width:100%;aspect-ratio:16/9;background:#030b13;border:1px solid var(--line);border-radius:12px;object-fit:contain}.yt{width:100%;aspect-ratio:16/9;border:0;border-radius:12px;background:#030b13}.sectionnote{font-size:12px;color:var(--muted);line-height:1.5;margin:10px 0 0}.inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.inline input{flex:1;min-width:100px}
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:6;background:#071525ed;backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;justify-content:center;gap:8px;padding:10px 8px calc(10px + env(safe-area-inset-bottom))}
+.nav button{background:transparent;border:0;padding:8px 12px;color:var(--muted);font-size:12px}.nav button:focus,.nav button:hover{color:white;background:#12314d}
+.orientation-actions{display:flex;gap:8px;flex-wrap:wrap}.orientation-actions button.active{background:linear-gradient(135deg,#087bc7,#1555a2);border-color:#67d7ff}.orientation-preview{border:1px dashed #39739a;border-radius:14px;min-height:76px;padding:14px;display:flex;align-items:center;justify-content:center;text-align:center;background:#091a2b}.orientation-preview.landscape{min-height:54px;max-width:100%;}.orientation-preview.portrait{min-height:130px;max-width:220px;margin-inline:auto}.speed-ring{width:180px;height:180px;border-radius:50%;border:7px solid #1b4c70;box-shadow:inset 0 0 22px #0b7fc955,0 0 22px #087bc733;display:grid;place-items:center;margin:auto}.notice{padding:10px 12px;border-radius:11px;background:#102d46;border:1px solid #245276;color:#c8e7ff;font-size:12px;line-height:1.5;margin-top:10px}
+footer{text-align:center;color:#718ba3;font-size:11px;margin-top:22px}
+@media(max-width:800px){.grid,.two{grid-template-columns:1fr}.mapframe{height:250px}.header-right .pill{display:none}main{padding:13px 12px 100px}.card{padding:14px}.nav{justify-content:space-around}.nav button{padding:8px 5px;font-size:11px}}
+@media(min-width:1100px){main{padding-top:24px}.mapframe{height:350px}}
+
+/* HACKER COMMAND CENTER / FULL-WIDTH SINGLE-MODULE LAYOUT */
+body{background-color:#030a12;background-image:linear-gradient(#0b243522 1px,transparent 1px),linear-gradient(90deg,#0b243522 1px,transparent 1px),radial-gradient(ellipse at 50% -15%,#07517a66,transparent 55%);background-size:32px 32px,32px 32px,auto;}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:4;background:repeating-linear-gradient(0deg,#ffffff04 0 1px,transparent 1px 4px);opacity:.28}
+header{border-bottom-color:#12618a;box-shadow:0 5px 30px #00aaff16}.logo{box-shadow:0 0 22px #00baff66}.brand{color:#dff7ff}
+.app-main{width:100%;max-width:1500px;margin:0 auto;padding:24px clamp(12px,2.5vw,36px) 115px;min-height:calc(100dvh - 70px)}
+.page{display:none;width:100%;animation:pageIn .28s ease both}.page.active{display:block}@keyframes pageIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+.page-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:4px 0 22px;padding:clamp(18px,3vw,30px);border:1px solid #145277;border-radius:18px;background:linear-gradient(110deg,#071b2b,#0a2940 58%,#061523);box-shadow:inset 0 0 35px #00aaff0b,0 12px 35px #0005;position:relative;overflow:hidden}
+.page-heading:after{content:"";position:absolute;right:-55px;top:-90px;width:240px;height:240px;border:1px solid #1b8fc344;border-radius:50%;box-shadow:0 0 0 24px #1b8fc311,0 0 0 48px #1b8fc30a}
+.eyebrow{color:#42caff;font-size:10px;letter-spacing:.2em;font-weight:800}.page-heading h1{font-size:clamp(24px,4vw,42px);letter-spacing:.08em;margin:7px 0;color:#effaff;text-shadow:0 0 18px #00baff55}.page-heading p{color:#94b4c9;margin:0;font-size:13px}.live-tag{white-space:nowrap;border:1px solid #1c789f;color:#71dbff;border-radius:30px;padding:8px 12px;font-size:10px;letter-spacing:.12em;font-weight:800;z-index:1}.live-tag i{display:inline-block;width:7px;height:7px;background:#35e6a1;border-radius:50%;margin-right:6px;box-shadow:0 0 10px #35e6a1}
+.statusbar{margin-bottom:18px}.dashboard-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.module-tile{min-height:155px;text-align:left;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:20px;background:linear-gradient(145deg,#0b2337,#061421);border:1px solid #145071;border-radius:16px;box-shadow:inset 0 0 24px #008acb0b,0 10px 25px #0004;transition:.2s}.module-tile:hover{transform:translateY(-3px);border-color:#39caff;box-shadow:0 0 24px #00aaff26}.module-tile b{font-size:28px;color:#42caff;text-shadow:0 0 14px #00aaff88}.module-tile strong{font-size:13px;letter-spacing:.08em}.module-tile small{color:#92afc3}.module-tile span{margin-top:auto;color:#3fc6fa;font-size:9px;letter-spacing:.16em}
+.full-card{width:100%;min-height:300px;padding:clamp(16px,2.4vw,30px);border-color:#145277;box-shadow:0 15px 42px #0005,inset 0 0 35px #00aaff08}.full-card h2{font-size:clamp(16px,2vw,20px);color:#c9f1ff;letter-spacing:.09em;margin-bottom:20px}.mapframe{height:min(58vh,620px);min-height:320px}.video,.yt{max-height:65vh}.speedwrap{min-height:clamp(240px,35vh,380px)}.speed-ring{width:clamp(190px,28vw,270px);height:clamp(190px,28vw,270px);border-color:#1686b7;box-shadow:inset 0 0 35px #0b7fc955,0 0 34px #087bc755}.speed{font-size:clamp(76px,12vw,120px)}.center-actions{justify-content:center;margin:22px 0}.speedmeta{max-width:850px;margin:18px auto}.metric{background:#061522;border-color:#16415e}.terminal-panel{margin-top:18px;border:1px solid #155273;border-radius:14px;background:#020b12;padding:16px;color:#72d8ac;font:12px ui-monospace,monospace;box-shadow:inset 0 0 25px #00c8780a}.terminal-panel p{margin:7px 0}.terminal-head{display:flex;justify-content:space-between;color:#5acbff;border-bottom:1px solid #17435b;padding-bottom:9px;margin-bottom:10px}.terminal-head span{color:#47e6a6}
+.partner-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.partner-card{padding:clamp(20px,3vw,34px);min-height:270px}.partner-icon{width:58px;height:58px;display:grid;place-items:center;border-radius:16px;background:linear-gradient(135deg,#0c91d2,#06416d);font-weight:900;font-size:19px;box-shadow:0 0 25px #00aaff44}.partner-card h2{margin:18px 0 8px;font-size:20px}.partner-card p{color:#9ab0c5;line-height:1.6;min-height:48px}.partner-link{display:inline-flex;margin:12px 8px 0 0;padding:11px 14px;background:linear-gradient(135deg,#087bc7,#1555a2);color:#fff;text-decoration:none;border-radius:10px;font-size:12px;font-weight:750}.secondary-link{background:#102b40;border:1px solid #225573}.notice{line-height:1.7}.nav{overflow-x:auto;justify-content:flex-start;gap:5px;padding:9px max(8px,calc((100vw - 1100px)/2)) calc(9px + env(safe-area-inset-bottom));border-top-color:#12618a;box-shadow:0 -8px 30px #0006}.nav button{min-width:68px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:19px;border-radius:10px;color:#8eafc4}.nav button small{font-size:9px;letter-spacing:.04em}.nav button.selected{color:#71dcff;background:#0d3550;box-shadow:inset 0 0 15px #00aaff22}.nav button:hover{color:#fff;background:#123b56}
+@media(max-width:900px){.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.app-main{padding-top:14px}.page-heading{align-items:flex-start}.partner-grid{grid-template-columns:1fr}}
+@media(max-width:480px){.page-heading{padding:16px;flex-direction:column}.live-tag{align-self:flex-start}.dashboard-grid{gap:9px}.module-tile{min-height:132px;padding:14px}.module-tile strong{font-size:11px}.mapframe{height:48vh;min-height:260px}.speedmeta{grid-template-columns:repeat(3,minmax(0,1fr))}.metric{padding:9px 7px}.metric strong{font-size:14px}.nav button{min-width:58px}}
+
+
+/* === FULLSCREEN HACKER COLOR UI / LEFT VERTICAL COMMAND RAIL === */
+:root{--rail:88px;--neon:#26e6ff;--violet:#a855f7;--lime:#5cffb1;--pink:#ff4fd8;--amber:#ffd166}
+html,body{min-height:100%;height:100%;overflow-x:hidden}
+body{background-image:linear-gradient(90deg,#00d9ff09 1px,transparent 1px),linear-gradient(#00d9ff09 1px,transparent 1px),radial-gradient(ellipse at 75% 10%,#073e7c88,transparent 48%),radial-gradient(ellipse at 10% 90%,#35105c55,transparent 45%),linear-gradient(135deg,#02060d,#061525 55%,#030912);background-size:28px 28px,28px 28px,auto,auto,auto}
+body:after{content:"";position:fixed;inset:0;z-index:3;pointer-events:none;opacity:.16;background:linear-gradient(115deg,transparent 0 44%,#24e7ff12 50%,transparent 56%),repeating-linear-gradient(0deg,transparent 0 5px,#fff04 6px);animation:cyberSweep 12s linear infinite}
+@keyframes cyberSweep{0%{transform:translateY(-18%)}100%{transform:translateY(18%)}}
+header{height:68px;margin-left:var(--rail);padding-left:22px;padding-right:22px;background:linear-gradient(90deg,#06111fee,#081b2fee);border-bottom:1px solid #16cfff66;box-shadow:0 5px 32px #00cfff20;position:sticky}
+.app-main{margin-left:var(--rail);width:calc(100% - var(--rail));max-width:none;height:calc(100dvh - 68px);min-height:calc(100dvh - 68px);overflow-y:auto;overflow-x:hidden;padding:clamp(14px,2vw,28px) clamp(14px,2.4vw,34px) 26px;scrollbar-color:#167da6 #06111d}
+.page{min-height:calc(100dvh - 120px);width:100%}.page.active{display:flex;flex-direction:column}.page-heading{flex:0 0 auto;border-color:#147eae;background:linear-gradient(110deg,#061321,#092a46 50%,#180e35);box-shadow:0 0 25px #00cfff12,inset 0 0 40px #00cfff0b}
+.page-heading h1{background:linear-gradient(90deg,#f2fdff,#42dfff 45%,#c78aff 82%,#63ffcf);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}
+.card,.module-tile,.partner-card{border-color:#176084;background:linear-gradient(145deg,#0a1e32ed,#07111ff2);box-shadow:0 12px 36px #0007,inset 0 0 24px #00cfff09}
+.card:hover,.partner-card:hover{border-color:#34dcff;box-shadow:0 0 26px #00cfff20,0 12px 38px #0008}
+.nav{position:fixed;inset:0 auto 0 0;width:var(--rail);height:100dvh;z-index:20;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:7px;overflow-y:auto;overflow-x:hidden;padding:12px 9px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(180deg,#050d18f7,#071b2cf7 48%,#100b25f7);border:0;border-right:1px solid #16cfff66;box-shadow:8px 0 35px #0008,3px 0 25px #00d9ff10;scrollbar-width:thin;scrollbar-color:#167da6 transparent}
+.nav-brand{height:48px;min-height:48px;display:grid;place-items:center;margin-bottom:8px;border:1px solid #20cfff66;border-radius:13px;color:#dffaff;font-weight:1000;font-size:18px;letter-spacing:-2px;text-shadow:0 0 13px #00dfff;box-shadow:inset 0 0 20px #00dfff18,0 0 16px #00dfff16}.nav-brand span{color:#c27aff;font-size:9px;margin-left:2px}
+.nav button{width:100%;min-width:0;min-height:61px;flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:7px 3px;margin:0;border:1px solid transparent;border-radius:12px;background:transparent;color:#7f9eb7;transition:all .2s ease}
+.nav button b{font-size:22px;line-height:1;color:#55cfff;text-shadow:0 0 10px #00bfff55}.nav button small{font-size:8px;font-weight:900;letter-spacing:.08em;color:inherit}
+.nav button.selected{color:#eaffff;border-color:#21d9ff77;background:linear-gradient(145deg,#0d3b55,#13203f);box-shadow:inset 0 0 18px #00d9ff20,0 0 17px #00d9ff22}.nav button.selected b{color:#b9f8ff;text-shadow:0 0 14px #00dfff,0 0 24px #00dfff}
+.nav button:nth-of-type(4n+2) b{color:#b68cff}.nav button:nth-of-type(4n+3) b{color:#54ffc1}.nav button:nth-of-type(4n+4) b{color:#ff73d9}.nav button:hover{border-color:#46dfff88;background:#0d2941;color:white;transform:translateX(2px)}
+.nav-foot{margin-top:auto;padding:10px 2px 2px;text-align:center;color:#4ce8b0;font:800 8px/1.7 ui-monospace,monospace;letter-spacing:.1em;border-top:1px solid #1b5770}
+.dashboard-grid{grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:clamp(10px,1.5vw,18px)}.module-tile{min-height:clamp(150px,22vh,220px)}.module-tile b{font-size:34px;color:#53eaff}.module-tile:nth-child(3n+2) b{color:#b58cff}.module-tile:nth-child(3n) b{color:#5dffbd}
+.full-card{flex:1;min-height:calc(100dvh - 210px);display:flex;flex-direction:column}.video,.yt{width:100%;flex:1;min-height:45vh;max-height:calc(100dvh - 280px)}
+/* Dedicated portrait map viewport: remains a tall, centered map even on landscape displays. */
+#page-maps{min-height:calc(100dvh - 68px)}#page-maps .page-heading{margin-bottom:12px;padding:13px 20px}#page-maps .page-heading h1{font-size:clamp(20px,2.5vw,30px);margin:3px 0}#page-maps .page-heading p{font-size:11px}
+#page-maps #navigation{width:min(100%,560px);height:calc(100dvh - 150px);min-height:430px;max-height:none;flex:1;margin:0 auto;padding:12px;display:flex;flex-direction:column;gap:9px;border-color:#20cfff88;box-shadow:0 0 35px #00bfff20,inset 0 0 35px #00bfff0b}
+#page-maps #navigation h2{margin:0;font-size:12px;letter-spacing:.14em;color:#75eaff}
+#page-maps .mapsearch{flex:0 0 auto}#page-maps .mapsearch input{padding:10px;font-size:13px}
+#page-maps .mapframe{display:block;width:100%;height:auto;min-height:0;max-height:none;flex:1;border:1px solid #29bfff66;border-radius:13px;aspect-ratio:9/15;box-shadow:0 0 25px #00aaff19}
+#page-maps .mapactions{flex:0 0 auto;margin:0}#page-maps .sectionnote{font-size:10px;margin:0;line-height:1.35}
+body.maps-mode .app-main{padding-top:10px;padding-bottom:10px}body.maps-mode #page-maps{min-height:calc(100dvh - 88px)}body.maps-mode #page-maps .page-heading{display:none}body.maps-mode #page-maps #navigation{height:calc(100dvh - 88px);min-height:0}
+@media(max-width:700px){:root{--rail:72px}header{height:60px;padding:8px 10px 8px 14px}.brand{font-size:12px;letter-spacing:.04em}.logo{width:32px;height:32px}.clock strong{font-size:16px}.clock small{font-size:9px}.app-main{height:calc(100dvh - 60px);min-height:calc(100dvh - 60px);padding:12px 10px 18px}.page{min-height:calc(100dvh - 85px)}.nav{gap:5px;padding:8px 6px calc(10px + env(safe-area-inset-bottom))}.nav-brand{height:42px;min-height:42px;font-size:15px}.nav button{min-height:56px}.nav button b{font-size:20px}.nav button small{font-size:7px}.page-heading{margin-bottom:12px;padding:15px}.full-card{min-height:calc(100dvh - 170px)}#page-maps #navigation{width:min(100%,480px);height:calc(100dvh - 80px);padding:9px;gap:7px}body.maps-mode #page-maps #navigation{height:calc(100dvh - 60px)}#page-maps .mapsearch button{padding:9px 10px;font-size:11px}#page-maps .mapsearch input{font-size:12px}.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.module-tile{min-height:140px}}
+@media(max-height:560px) and (orientation:landscape){#page-maps #navigation{width:min(100%,440px);height:calc(100dvh - 76px);min-height:0}#page-maps .mapframe{aspect-ratio:9/15}body.maps-mode #page-maps #navigation{height:calc(100dvh - 60px)}.nav button{min-height:48px}.nav-brand{height:36px;min-height:36px}}
+@media(prefers-reduced-motion:no-preference){.module-tile,.card,.page-heading{animation:neonBreathe 5s ease-in-out infinite alternate}.nav button.selected{animation:navPulse 2.8s ease-in-out infinite alternate}}
+@keyframes neonBreathe{from{filter:drop-shadow(0 0 0 #00dfff00)}to{filter:drop-shadow(0 0 7px #00dfff18)}}@keyframes navPulse{from{box-shadow:inset 0 0 12px #00d9ff12,0 0 8px #00d9ff10}to{box-shadow:inset 0 0 20px #00d9ff24,0 0 18px #00d9ff28}}
+
+
+/* ===== PRO MAX CYBER LAYER ===== */
+:root{--neon:#35f3ff;--violet:#b66bff;--acid:#62ffb4;--hot:#ff55d8;--gold:#ffd36a}
+html{scroll-behavior:smooth}
+body{background-color:#020711;background-image:
+radial-gradient(ellipse at 15% 15%,#073b5c88,transparent 38%),
+radial-gradient(ellipse at 85% 75%,#38105b66,transparent 42%),
+linear-gradient(90deg,#18dfff0b 1px,transparent 1px),
+linear-gradient(#18dfff0b 1px,transparent 1px),
+linear-gradient(135deg,#02050c,#071326 52%,#090619);background-size:auto,auto,26px 26px,26px 26px,auto}
+body:before{opacity:.42;background:repeating-linear-gradient(0deg,transparent 0 3px,#8beaff0b 4px,transparent 5px 7px)}
+.card,.module-tile,.page-heading,.partner-card{position:relative;isolation:isolate;overflow:hidden}
+.card:before,.module-tile:before,.partner-card:before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(120deg,#27eaff77,transparent 35%,#c16bff66 70%,#52ffbd66);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:.55}
+.card:hover,.module-tile:hover,.partner-card:hover{filter:brightness(1.12);box-shadow:0 0 28px #00d9ff30,0 0 60px #a855f718,inset 0 0 25px #00d9ff0d}
+.page-heading{border-color:#27dfff99;box-shadow:0 0 28px #00d9ff20,inset 0 0 40px #00d9ff12}
+.page-heading:before{content:"";position:absolute;left:-30%;top:0;width:28%;height:100%;background:linear-gradient(90deg,transparent,#5ceaff16,transparent);transform:skewX(-22deg);animation:headingSweep 7s linear infinite;pointer-events:none}
+@keyframes headingSweep{0%{left:-35%}100%{left:130%}}
+.module-tile{transition:transform .25s,border-color .25s,box-shadow .25s}
+.module-tile b{filter:drop-shadow(0 0 10px currentColor)}
+.live-tag,.pill{box-shadow:inset 0 0 14px #20dfff0b,0 0 12px #00d9ff12}
+.terminal-panel{position:relative;overflow:hidden;border-color:#1ce7c588;box-shadow:0 0 26px #00ffa51c,inset 0 0 30px #00ff9d0b}
+.terminal-panel:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(transparent 48%,#5affb40a 50%,transparent 52%);background-size:100% 8px}
+button{transition:transform .18s,box-shadow .18s,border-color .18s}
+button:active{transform:scale(.97)}
+button.primary{box-shadow:0 0 18px #078fff55,inset 0 0 12px #ffffff14}
+.speed-ring{position:relative;border-color:#36eaff;box-shadow:inset 0 0 42px #0b7fc977,0 0 18px #00dfff77,0 0 55px #a855f733}
+.speed-ring:before{content:"";position:absolute;inset:-13px;border:1px dashed #45eaff66;border-radius:50%;animation:spinRing 22s linear infinite}
+.speed-ring:after{content:"";position:absolute;inset:-5px;border:2px solid transparent;border-top-color:#c17bff;border-bottom-color:#54ffc1;border-radius:50%;animation:spinRing 5s linear infinite reverse}
+@keyframes spinRing{to{transform:rotate(360deg)}}
+.metric{position:relative;overflow:hidden;border-color:#1c6683;box-shadow:inset 0 0 20px #00d9ff0a}
+.metric:after{content:"";position:absolute;left:0;bottom:0;width:100%;height:2px;background:linear-gradient(90deg,#32eaff,#bd6cff,#58ffbd);opacity:.75}
+.map-hud{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;padding:9px 11px;border:1px solid #1d7894;border-radius:10px;background:#020b16;color:#7ea9c0;font:9px ui-monospace,monospace;letter-spacing:.09em}
+.map-hud b{color:#62ffbd;margin-left:5px}
+.speed-alert{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:12px;border:1px solid #176383;border-radius:12px;background:#061522;margin-top:12px}
+.speed-alert label{font-size:11px;color:#9cc3d8}.speed-alert input{width:78px;padding:9px;background:#020b16;color:white;border:1px solid #28617b;border-radius:8px}.speed-alert span{font-size:10px;color:#62ffbd}
+.trip-history{margin-top:20px;padding:14px;border:1px solid #176383;border-radius:14px;background:#030d18}
+.trip-history h3{font-size:12px;letter-spacing:.12em;color:#70eaff;margin:0 0 10px}
+.history-item{display:grid;grid-template-columns:1fr auto;gap:8px;padding:11px 0;border-bottom:1px solid #16405a;font-size:11px;color:#b8d4e5}
+.history-item:last-child{border-bottom:0}.history-item strong{color:#6dffc0}.history-item small{display:block;color:#789bb1;margin-top:4px}
+.advanced-metrics{margin-top:8px}
+body.maps-mode header,body.maps-mode .nav{display:none!important}
+body.maps-mode .app-main{position:fixed;inset:0;width:100%;height:100dvh;min-height:100dvh;margin:0;padding:0;overflow:hidden;z-index:30}
+body.maps-mode #page-maps{height:100dvh;min-height:100dvh;width:100%;display:flex}
+body.maps-mode #page-maps .page-heading{display:none}
+body.maps-mode #page-maps #navigation{position:absolute;inset:0;width:100%;height:100dvh;min-height:0;max-height:none;margin:0;padding:clamp(8px,1.5vw,18px);border:0;border-radius:0;display:flex;flex-direction:column;gap:9px;background:linear-gradient(145deg,#020914f5,#06192af5);box-shadow:none}
+body.maps-mode #page-maps #navigation h2{font-size:11px}
+body.maps-mode #page-maps .mapframe{flex:1 1 auto;width:100%;height:100%;min-height:0;max-height:none;aspect-ratio:auto;border-radius:10px}
+body.maps-mode #page-maps .mapsearch{flex:0 0 auto}
+body.maps-mode #page-maps .mapactions{flex:0 0 auto;margin:0}
+body.maps-mode #page-maps .map-hud{flex:0 0 auto}
+body.maps-mode #page-maps .sectionnote{display:none}
+body.maps-mode #page-maps .mapactions button{padding:8px 11px;font-size:11px}
+@media(orientation:landscape){
+ body.maps-mode #page-maps #navigation{padding:7px 10px;gap:6px}
+ body.maps-mode #page-maps #navigation h2{font-size:10px}
+ body.maps-mode #page-maps .mapsearch input{padding:8px}
+ body.maps-mode #page-maps .mapactions{justify-content:flex-end}
+ body.maps-mode #page-maps .map-hud{font-size:8px;padding:6px 9px}
+}
+@media(max-width:700px){
+ .map-hud{font-size:8px}
+ .speed-alert{gap:7px}
+ body.maps-mode #page-maps #navigation{padding:7px}
+ body.maps-mode #page-maps .mapsearch button{padding:8px;font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
+
+
+/* GLOBAL FULLSCREEN + CYBER HUD */
+.fullscreen-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end;margin:10px 0 16px}
+.fullscreen-tools button,.fs-exit-global{border:1px solid rgba(0,245,255,.65);background:linear-gradient(120deg,rgba(0,245,255,.16),rgba(168,85,247,.2),rgba(57,255,20,.12));color:#e9ffff;border-radius:11px;padding:10px 13px;font:700 10px/1.2 ui-monospace,monospace;letter-spacing:.8px;text-transform:uppercase;box-shadow:0 0 14px rgba(0,245,255,.15),inset 0 0 12px rgba(0,245,255,.06);cursor:pointer;transition:.22s}
+.fullscreen-tools button:hover,.fs-exit-global:hover{transform:translateY(-2px);box-shadow:0 0 22px rgba(0,245,255,.42),0 0 35px rgba(168,85,247,.2);border-color:#39ff14}
+.fullscreen-tools button:active,.fs-exit-global:active{transform:scale(.97)}
+.fs-exit-global{position:fixed;z-index:99999;right:14px;top:12px;display:none;background:#06121ef2}
+body.app-fullscreen-fallback header,body.app-fullscreen-fallback .nav{display:none!important}
+body.app-fullscreen-fallback .app-main{width:100%;max-width:none;margin:0;padding:clamp(8px,1.5vw,22px);min-height:100dvh}
+.page.module-fullscreen-fallback{position:fixed!important;z-index:99990!important;inset:0!important;width:100vw!important;height:100dvh!important;max-height:100dvh!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain;margin:0!important;padding:clamp(8px,1.5vw,22px)!important;padding-bottom:max(18px,env(safe-area-inset-bottom))!important;background:radial-gradient(ellipse at 15% 0%,#123c54 0%,#061321 48%,#02050d 100%)!important}
+.page:fullscreen{display:block!important;width:100vw!important;height:100dvh!important;max-height:100dvh!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain;padding:clamp(8px,1.5vw,22px)!important;padding-bottom:max(18px,env(safe-area-inset-bottom))!important;background:radial-gradient(ellipse at 15% 0%,#123c54 0%,#061321 48%,#02050d 100%)}
+.page:fullscreen .page-heading,.page.module-fullscreen-fallback .page-heading{margin:0 0 10px;padding:clamp(12px,2vw,24px);gap:10px;flex-wrap:wrap}
+.page:fullscreen .fullscreen-tools,.page.module-fullscreen-fallback .fullscreen-tools{margin:8px 0 12px;justify-content:flex-start;flex-wrap:wrap}
+.page:fullscreen .card,.page.module-fullscreen-fallback .card{max-width:none;min-width:0}
+.page:fullscreen .full-card,.page.module-fullscreen-fallback .full-card{min-height:0}
+.page:fullscreen .mapframe,.page.module-fullscreen-fallback .mapframe{height:clamp(240px,58dvh,720px);min-height:220px}
+.page:fullscreen .video,.page:fullscreen .yt,.page.module-fullscreen-fallback .video,.page.module-fullscreen-fallback .yt{height:auto;max-height:62dvh;object-fit:contain}
+.page:fullscreen .partner-grid,.page.module-fullscreen-fallback .partner-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.page:fullscreen .dashboard-grid,.page.module-fullscreen-fallback .dashboard-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr))}
+body:fullscreen .app-main{max-width:none;width:100%;min-height:100dvh;padding:clamp(8px,1.5vw,22px) clamp(8px,2vw,28px) 28px}
+body:fullscreen .fs-exit-global,body.app-fullscreen-fallback .fs-exit-global,.page:fullscreen~.fs-exit-global,.page.module-fullscreen-fallback~.fs-exit-global{display:block}
+@media(max-width:700px){.fullscreen-tools{justify-content:stretch}.fullscreen-tools button{flex:1 1 180px;min-width:0;padding:11px 8px;font-size:9px}.page:fullscreen,.page.module-fullscreen-fallback{padding:8px!important;padding-bottom:max(14px,env(safe-area-inset-bottom))!important}.page:fullscreen .page-heading,.page.module-fullscreen-fallback .page-heading{align-items:flex-start}.page:fullscreen .speedmeta,.page.module-fullscreen-fallback .speedmeta{grid-template-columns:repeat(auto-fit,minmax(125px,1fr))}}
+@media(orientation:landscape){.page:fullscreen .page-heading,.page.module-fullscreen-fallback .page-heading{margin-bottom:8px}.page:fullscreen .dashboard-grid,.page.module-fullscreen-fallback .dashboard-grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}.page:fullscreen .two,.page.module-fullscreen-fallback .two{grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}.page:fullscreen .speedwrap,.page.module-fullscreen-fallback .speedwrap{min-height:clamp(170px,32dvh,280px)}.page:fullscreen .mapframe,.page.module-fullscreen-fallback .mapframe{height:64dvh}}
+@media(prefers-reduced-motion:reduce){.page{animation:none!important}.module-tile,.fullscreen-tools button{transition:none!important}}
+
+
+/* GPS SPEEDOMETER — COMPACT FIT-TO-VIEWPORT LAYOUT */
+#page-speed .full-card{min-height:0}
+#page-speed .speedwrap{min-height:clamp(150px,24vh,220px);padding:4px 0}
+#page-speed .speed-ring{width:clamp(142px,21vw,190px);height:clamp(142px,21vw,190px);border-width:5px}
+#page-speed .speed-ring:before{inset:-8px}
+#page-speed .speed{font-size:clamp(54px,8vw,82px)}
+#page-speed .center-actions{margin:10px 0;gap:7px}
+#page-speed .speedmeta{margin:9px auto;gap:7px}
+#page-speed .metric{padding:8px 10px}
+#page-speed .metric strong{font-size:clamp(13px,1.7vw,16px)}
+#page-speed .speed-alert{margin-top:8px;padding:9px;gap:7px}
+#page-speed .sectionnote{margin-top:7px}
+/* Native fullscreen and fallback share the same compact geometry. */
+#page-speed:fullscreen .page-heading,#page-speed.module-fullscreen-fallback .page-heading{padding:9px 14px;margin-bottom:8px}
+#page-speed:fullscreen .page-heading h1,#page-speed.module-fullscreen-fallback .page-heading h1{font-size:clamp(19px,3vw,28px);margin:3px 0}
+#page-speed:fullscreen .page-heading p,#page-speed.module-fullscreen-fallback .page-heading p{font-size:11px}
+#page-speed:fullscreen .fullscreen-tools,#page-speed.module-fullscreen-fallback .fullscreen-tools{margin:5px 0 8px}
+#page-speed:fullscreen .full-card,#page-speed.module-fullscreen-fallback .full-card{padding:clamp(9px,1.5vw,16px)}
+#page-speed:fullscreen .full-card h2,#page-speed.module-fullscreen-fallback .full-card h2{font-size:14px;margin-bottom:7px}
+#page-speed:fullscreen .speedwrap,#page-speed.module-fullscreen-fallback .speedwrap{min-height:clamp(125px,23dvh,185px)}
+#page-speed:fullscreen .speed-ring,#page-speed.module-fullscreen-fallback .speed-ring{width:clamp(126px,19vw,168px);height:clamp(126px,19vw,168px);border-width:4px}
+#page-speed:fullscreen .speed,#page-speed.module-fullscreen-fallback .speed{font-size:clamp(48px,7vw,70px)}
+#page-speed:fullscreen .center-actions,#page-speed.module-fullscreen-fallback .center-actions{margin:6px 0}
+#page-speed:fullscreen .speedmeta,#page-speed.module-fullscreen-fallback .speedmeta{margin:6px auto;gap:6px}
+#page-speed:fullscreen .metric,#page-speed.module-fullscreen-fallback .metric{padding:6px 8px}
+#page-speed:fullscreen .speed-alert,#page-speed.module-fullscreen-fallback .speed-alert{margin-top:5px;padding:7px}
+#page-speed:fullscreen .sectionnote,#page-speed.module-fullscreen-fallback .sectionnote{font-size:10px;line-height:1.35;margin-top:5px}
+@media(orientation:landscape){
+ #page-speed:fullscreen .full-card,#page-speed.module-fullscreen-fallback .full-card{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(0,1.2fr);column-gap:14px;align-items:center}
+ #page-speed:fullscreen .full-card>h2,#page-speed.module-fullscreen-fallback .full-card>h2{grid-column:1/-1;margin:0 0 4px}
+ #page-speed:fullscreen .speedwrap,#page-speed.module-fullscreen-fallback .speedwrap{grid-column:1;grid-row:2 / span 2;min-height:0;height:clamp(130px,27dvh,190px)}
+ #page-speed:fullscreen .center-actions,#page-speed.module-fullscreen-fallback .center-actions{grid-column:2;grid-row:2;justify-content:flex-start;align-self:end}
+ #page-speed:fullscreen .speedmeta,#page-speed.module-fullscreen-fallback .speedmeta{grid-column:2;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;margin:4px 0}
+ #page-speed:fullscreen .advanced-metrics,#page-speed.module-fullscreen-fallback .advanced-metrics{grid-column:1/-1}
+ #page-speed:fullscreen .speed-alert,#page-speed.module-fullscreen-fallback .speed-alert{grid-column:1/-1}
+ #page-speed:fullscreen .sectionnote,#page-speed.module-fullscreen-fallback .sectionnote{grid-column:1/-1}
+}
+@media(max-width:700px){#page-speed:fullscreen .speedmeta,#page-speed.module-fullscreen-fallback .speedmeta{grid-template-columns:repeat(3,minmax(0,1fr))}#page-speed:fullscreen .metric small,#page-speed.module-fullscreen-fallback .metric small{font-size:9px}}
+
+</style>
+</head>
+<body>
+<header>
+ <div class="brand"><div class="logo">⌁</div><div>naviXU3<div class="sub">PRO MAX ULTIMATE</div></div></div>
+ <div class="header-right"><div class="pill"><span class="dot" id="gpsDot"></span><span id="gpsHeader">GPS belum aktif</span></div><div class="clock"><strong id="clock">--:--:--</strong><small id="date">Memuat tanggal…</small></div></div>
+</header>
+<main class="app-main">
+ <section class="page active" id="page-home" data-page="home">
+  <div class="page-heading"><div><span class="eyebrow">SYSTEM OVERVIEW / 01</span><h1>COMMAND CENTER</h1><p>Panel kendali perjalanan naviXU3. Pilih modul dari navigasi bawah.</p></div><span class="live-tag"><i></i> SYSTEM ONLINE</span></div>
+  <div class="statusbar">
+   <div class="pill"><span class="dot" id="gpsDot2"></span><span id="gpsStatus">GPS: nonaktif</span></div>
+   <div class="pill"><span class="dot" id="mirrorDot"></span><span id="mirrorStatus">Screen share: berhenti</span></div>
+   <div class="pill"><span class="dot" id="netDot"></span><span id="netStatus">Jaringan: memeriksa</span></div>
+   <div class="pill"><span class="dot"></span><span id="batteryStatus">Baterai: tidak tersedia</span></div>
+  </div>
+  <div class="dashboard-grid">
+   <button class="module-tile" data-go="maps"><b>⌖</b><strong>SMART MAPS</strong><small>Navigasi & tujuan</small><span>OPEN MODULE ↗</span></button>
+   <button class="module-tile" data-go="speed"><b>◉</b><strong>GPS SPEEDOMETER</strong><small>Kecepatan realtime</small><span>OPEN MODULE ↗</span></button>
+   <button class="module-tile" data-go="orientation"><b>▣</b><strong>DISPLAY CONTROL</strong><small>Portrait / Landscape</small><span>OPEN MODULE ↗</span></button>
+   <button class="module-tile" data-go="mirror"><b>▤</b><strong>SCREEN MIRROR</strong><small>Berbagi layar</small><span>OPEN MODULE ↗</span></button>
+   <button class="module-tile" data-go="music"><b>♫</b><strong>DRIVE MUSIC</strong><small>Media & audio</small><span>OPEN MODULE ↗</span></button>
+   <button class="module-tile" data-go="apps"><b>◈</b><strong>SHOPEE INTEGRATION</strong><small>ShopeeFood / Shopee Driver</small><span>OPEN MODULE ↗</span></button>
+   <button class="module-tile" data-go="connections"><b>⌁</b><strong>DEVICE LINK</strong><small>Jaringan & Bluetooth</small><span>OPEN MODULE ↗</span></button>
+   <button class="module-tile" data-go="trip"><b>◷</b><strong>TRIP DATA</strong><small>Statistik perjalanan</small><span>OPEN MODULE ↗</span></button>
+  </div>
+  <div class="terminal-panel"><div class="terminal-head">ROOT@SMART-DRIVE:~ <span>LIVE STATUS</span></div><p id="systemLog">[BOOT] naviXU3 interface initialized…</p><p>[SECURE] Location permission is user-controlled.</p><p>[READY] Pilih modul untuk membuka layar khusus.</p></div>
+ </section>
+ <section class="page" id="page-maps" data-page="maps">
+  <div class="page-heading"><div><span class="eyebrow">NAVIGATION MODULE / 02</span><h1>SMART MAPS</h1><p>Pencarian tujuan dan navigasi melalui Google Maps resmi.</p></div><span class="live-tag">GPS LINK</span></div>
+  <section class="card full-card" id="navigation"><h2>⌖ GOOGLE MAPS · NAVIGASI</h2><div class="mapsearch"><input id="destination" placeholder="Cari tujuan, alamat, atau tempat…"><button class="primary" id="searchMap">Cari tujuan</button></div><iframe class="mapframe" id="map" title="Peta Google Maps" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed"></iframe><div class="mapactions"><button id="myLocation">⌖ Lokasi saya</button><button class="primary" id="openMaps">Mulai navigasi ↗</button><button id="mapFullscreen">⛶ Fullscreen GPS</button><button id="exitMapFullscreen">Keluar fullscreen</button></div><div class="map-hud"><span>MAP LINK <b id="mapLinkStatus">STANDBY</b></span><span>ORIENTATION <b id="mapOrientationStatus">AUTO / NORTH-UP</b></span><span>GPS FIX <b id="mapGpsFix">WAITING</b></span></div><p class="sectionnote">Peta tertanam memerlukan internet. Navigasi suara dan petunjuk belokan dibuka melalui aplikasi Google Maps resmi. Website tidak dapat mengganti aplikasi default Android tanpa APK pendamping.</p></section>
+ </section>
+ <section class="page" id="page-speed" data-page="speed">
+  <div class="page-heading"><div><span class="eyebrow">TELEMETRY MODULE / 03</span><h1>GPS SPEEDOMETER</h1><p>Pantau kecepatan, akurasi GPS, dan ringkasan perjalanan.</p></div><span class="live-tag"><i></i> GPS READY</span></div>
+  <section class="card full-card" id="speed"><h2>◉ ANDROID GPS SPEEDOMETER</h2><div class="speedwrap"><div class="speed-ring"><div style="text-align:center"><div class="speed" id="speedValue">--</div><div class="unit">KM / H</div><div class="muted" id="speedCaption" style="font-size:12px;margin-top:8px">Menunggu izin lokasi</div></div></div></div><div class="actions center-actions"><button class="primary" id="startGps">Aktifkan GPS</button><button class="danger" id="stopGps">Hentikan</button><button id="resetTrip">Reset perjalanan</button></div><div class="speedmeta"><div class="metric"><small>Rata-rata</small><strong id="avgSpeed">--</strong></div><div class="metric"><small>Maksimum</small><strong id="maxSpeed">--</strong></div><div class="metric"><small>Akurasi</small><strong id="accuracy">--</strong></div></div><div class="speedmeta advanced-metrics"><div class="metric"><small>Ketinggian</small><strong id="altitude">--</strong></div><div class="metric"><small>Arah / Heading</small><strong id="heading">--</strong></div><div class="metric"><small>Status sinyal</small><strong id="gpsQuality">MENUNGGU</strong></div></div><div class="speed-alert"><label for="speedLimit">Batas pengingat kecepatan (km/jam)</label><input id="speedLimit" type="number" min="5" max="200" value="80"><button id="saveSpeedLimit">Simpan batas</button><span id="speedAlertStatus">Pengingat nonaktif</span></div><p class="sectionnote">Kecepatan berasal dari GPS Android, bukan ECU. Gunakan HTTPS atau APK, izinkan lokasi, dan jangan mengoperasikan layar saat berkendara.</p></section>
+ </section>
+ <section class="page" id="page-orientation" data-page="orientation">
+  <div class="page-heading"><div><span class="eyebrow">DISPLAY MODULE / 04</span><h1>DISPLAY CONTROL</h1><p>Atur tampilan berdiri, miring, atau otomatis secara langsung.</p></div><span class="live-tag">REALTIME UI</span></div>
+  <section class="card full-card" id="displayMode"><h2>▣ KONFIGURASI LAYAR REALTIME</h2><div class="orientation-actions"><button class="active" id="autoOrientation">Otomatis</button><button id="portraitOrientation">Berdiri · Portrait</button><button id="landscapeOrientation">Miring · Landscape</button></div><div class="orientation-preview" id="orientationPreview" style="margin-top:18px">Mode otomatis mengikuti orientasi perangkat</div><div class="actions center-actions"><button class="primary" id="applyOrientation">Terapkan orientasi layar</button><button id="fullscreenBtn">Layar penuh</button></div><p class="sectionnote" id="orientationStatus">Pilihan kunci orientasi bergantung dukungan browser/perangkat. Pada beberapa Android, penguncian hanya bekerja dalam layar penuh atau APK.</p></section>
+ </section>
+ <section class="page" id="page-mirror" data-page="mirror">
+  <div class="page-heading"><div><span class="eyebrow">CAST MODULE / 05</span><h1>SCREEN MIRROR</h1><p>Pratinjau screen capture yang diizinkan pengguna.</p></div><span class="live-tag">LOCAL CAPTURE</span></div>
+  <section class="card full-card" id="mirror"><h2>▣ SCREEN MIRRORING / SCREEN SHARE</h2><video class="video" id="screenPreview" autoplay playsinline muted></video><div class="actions center-actions"><button class="primary" id="startShare">Mulai berbagi layar</button><button class="danger" id="stopShare" disabled>Hentikan</button></div><div class="notice">Versi ini menampilkan pratinjau lokal browser. Mirroring jarak jauh ke head unit membutuhkan aplikasi Android MediaProjection, WebRTC signaling, dan server TURN. Izin capture harus disetujui pengguna.</div></section>
+ </section>
+ <section class="page" id="page-music" data-page="music">
+  <div class="page-heading"><div><span class="eyebrow">ENTERTAINMENT MODULE / 06</span><h1>DRIVE MUSIC</h1><p>Pemutar media resmi untuk perjalanan.</p></div><span class="live-tag">MEDIA CENTER</span></div>
+  <section class="card full-card" id="music"><h2>♫ naviXU3 MUSIC</h2><div class="musicform inline"><input id="youtubeInput" placeholder="Tempel URL YouTube atau ID video"><button class="primary" id="loadYoutube">Putar</button></div><iframe class="yt" id="youtubePlayer" title="YouTube player" allow="autoplay; encrypted-media; picture-in-picture; clipboard-write" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="margin-top:16px"></iframe><div class="actions"><button id="openYoutube">Buka YouTube Music ↗</button></div><p class="sectionnote">Pemutaran mengikuti ketentuan YouTube, termasuk iklan dan batasan akun. Bebas iklan memerlukan layanan Premium resmi.</p></section>
+ </section>
+ <section class="page" id="page-apps" data-page="apps">
+  <div class="page-heading"><div><span class="eyebrow">PARTNER APP MODULE / 07</span><h1>SHOPEE CONNECT</h1><p>Akses cepat ShopeeFood dan Shopee Driver dari satu panel.</p></div><span class="live-tag">EXTERNAL APP LINK</span></div>
+  <div class="partner-grid">
+   <section class="card partner-card"><div class="partner-icon">SF</div><h2>SHOPEEFOOD</h2><p>Shortcut untuk membuka layanan ShopeeFood. Gunakan akun dan aplikasi resmi.</p><a class="partner-link" href="https://shopee.co.id/" target="_blank" rel="noopener">Buka Shopee ↗</a><a class="partner-link secondary-link" href="https://play.google.com/store/search?q=ShopeeFood&c=apps" target="_blank" rel="noopener">Cari aplikasi ShopeeFood ↗</a></section>
+   <section class="card partner-card"><div class="partner-icon">SD</div><h2>SHOPEE DRIVER</h2><p>Shortcut pencarian aplikasi mitra/driver resmi di Google Play. Ketersediaan aplikasi mengikuti wilayah dan akun.</p><a class="partner-link" href="https://play.google.com/store/search?q=Shopee%20Driver&c=apps" target="_blank" rel="noopener">Cari aplikasi Shopee Driver ↗</a><a class="partner-link secondary-link" href="https://shopee.co.id/" target="_blank" rel="noopener">Buka situs Shopee ↗</a></section>
+  </div>
+  <div class="notice">Batas integrasi: halaman web ini belum memiliki API resmi Shopee untuk membaca pesanan, menerima order, mengubah status pengantaran, atau mengakses data akun. Jangan masukkan kata sandi Shopee ke halaman ini. Integrasi transaksi hanya boleh memakai API/kemitraan resmi dan autentikasi yang disetujui Shopee.</div>
+ </section>
+ <section class="page" id="page-connections" data-page="connections">
+  <div class="page-heading"><div><span class="eyebrow">CONNECTIVITY MODULE / 08</span><h1>DEVICE LINK</h1><p>Status jaringan dan perangkat Bluetooth.</p></div><span class="live-tag">I/O CONTROL</span></div>
+  <section class="card full-card"><h2>⌁ KONEKSI PERANGKAT</h2><div class="metric"><small>Jaringan saat ini</small><strong id="connectionType">Informasi tidak tersedia</strong></div><div class="actions"><button id="checkNetwork">Periksa jaringan</button><button id="bluetoothBtn">Pair Bluetooth</button></div><p class="sectionnote">Browser tidak dapat mengaktifkan Wi-Fi/Bluetooth sistem secara bebas. Web Bluetooth membutuhkan browser kompatibel, HTTPS, dan layanan GATT yang sesuai.</p></section>
+ </section>
+ <section class="page" id="page-trip" data-page="trip">
+  <div class="page-heading"><div><span class="eyebrow">TRIP ANALYTICS / 09</span><h1>TRIP DATA</h1><p>Ringkasan sesi GPS yang sedang berjalan.</p></div><span class="live-tag">SESSION DATA</span></div>
+  <section class="card full-card"><h2>◷ STATUS PERJALANAN</h2><div class="speedmeta trip-metrics"><div class="metric"><small>Durasi sesi</small><strong id="duration">00:00</strong></div><div class="metric"><small>Jarak GPS</small><strong id="distance">0.00 km</strong></div><div class="metric"><small>Koordinat</small><strong id="coords" style="font-size:12px">--</strong></div></div><div class="actions"><button class="primary" data-go="speed">Buka speedometer</button><button id="saveTrip">Simpan perjalanan</button><button id="exportTrips">Ekspor CSV</button><button id="clearTrips" class="danger">Hapus riwayat</button></div><div class="trip-history"><h3>▤ RIWAYAT PERJALANAN</h3><div id="tripHistoryList" class="history-list">Belum ada perjalanan tersimpan.</div></div><p class="sectionnote">Riwayat disimpan di penyimpanan lokal browser perangkat ini. Sinkronisasi antarperangkat memerlukan backend/database.</p></section>
+ </section>
+ <footer>naviXU3 · Gunakan fitur hanya saat kendaraan berhenti. Utamakan keselamatan berkendara.</footer>
+</main>
+<nav class="nav" aria-label="Navigasi modul">
+ <div class="nav-brand">SD<span>◆</span></div>
+ <button class="selected" data-go="home"><b>⌂</b><small>HOME</small></button>
+ <button data-go="maps"><b>⌖</b><small>MAPS</small></button>
+ <button data-go="speed"><b>◉</b><small>SPEED</small></button>
+ <button data-go="orientation"><b>▣</b><small>DISPLAY</small></button>
+ <button data-go="mirror"><b>▤</b><small>MIRROR</small></button>
+ <button data-go="music"><b>♫</b><small>MUSIC</small></button>
+ <button data-go="apps"><b>◈</b><small>SHOPEE</small></button>
+ <button data-go="connections"><b>⌁</b><small>DEVICE</small></button>
+ <button data-go="trip"><b>◷</b><small>TRIP</small></button>
+ <div class="nav-foot">SYS<br>ONLINE</div>
+</nav>
+<script>
+
+// Fullscreen controls are injected into EVERY module; one global exit control is shared.
+const $=id=>document.getElementById(id);
+let activeFullscreenPage=null;
+function syncFullscreenExit(){
+ const b=$('globalFullscreenExit');
+ if(b)b.style.display=(document.fullscreenElement||document.body.classList.contains('app-fullscreen-fallback')||document.querySelector('.page.module-fullscreen-fallback'))?'block':'none';
+}
+async function enterModuleFullscreen(page){
+ if(!page)return;
+ try{
+  if(document.fullscreenElement)await document.exitFullscreen();
+  document.body.classList.remove('app-fullscreen-fallback');
+  document.querySelectorAll('.module-fullscreen-fallback').forEach(x=>x.classList.remove('module-fullscreen-fallback'));
+  if(page.requestFullscreen){await page.requestFullscreen();activeFullscreenPage=page;}
+  else{page.classList.add('module-fullscreen-fallback');activeFullscreenPage=page;}
+ }catch(err){page.classList.add('module-fullscreen-fallback');activeFullscreenPage=page;}
+ syncFullscreenExit();
+}
+async function enterAppFullscreen(){
+ try{
+  if(document.fullscreenElement)await document.exitFullscreen();
+  document.querySelectorAll('.module-fullscreen-fallback').forEach(x=>x.classList.remove('module-fullscreen-fallback'));
+  document.body.classList.remove('app-fullscreen-fallback');
+  if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();
+  else document.body.classList.add('app-fullscreen-fallback');
+ }catch(err){document.body.classList.add('app-fullscreen-fallback');}
+ syncFullscreenExit();
+}
+async function exitAllFullscreen(){
+ document.querySelectorAll('.module-fullscreen-fallback').forEach(x=>x.classList.remove('module-fullscreen-fallback'));
+ document.body.classList.remove('app-fullscreen-fallback');
+ if(document.fullscreenElement){try{await document.exitFullscreen()}catch(e){}}
+ activeFullscreenPage=null;syncFullscreenExit();
+}
+function installFullscreenControls(){
+ document.querySelectorAll('.page').forEach((page)=>{
+  const heading=page.querySelector('.page-heading');if(!heading||heading.querySelector('.fullscreen-tools'))return;
+  const tools=document.createElement('div');tools.className='fullscreen-tools';
+  const mod=document.createElement('button');mod.type='button';mod.innerHTML='⛶ FULLSCREEN MODUL';mod.setAttribute('aria-label','Buka modul ini dalam layar penuh');
+  mod.addEventListener('click',()=>enterModuleFullscreen(page));
+  const app=document.createElement('button');app.type='button';app.innerHTML='▣ FULLSCREEN APLIKASI';app.setAttribute('aria-label','Buka seluruh aplikasi dalam layar penuh');
+  app.addEventListener('click',enterAppFullscreen);
+  tools.append(mod,app);heading.insertAdjacentElement('afterend',tools);
+ });
+ if(!$('globalFullscreenExit')){
+  const exit=document.createElement('button');exit.id='globalFullscreenExit';exit.className='fs-exit-global';exit.type='button';exit.textContent='✕ KELUAR FULLSCREEN';exit.addEventListener('click',exitAllFullscreen);document.body.appendChild(exit);
+ }
+ syncFullscreenExit();
+}
+installFullscreenControls();
+
+
+// Single-screen module navigation: only one full-width module is visible at a time.
+async function showPage(name){if(document.querySelector('.page.module-fullscreen-fallback'))await exitAllFullscreen();const target=document.querySelector('.page[data-page="'+name+'"]');if(!target)return;document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p===target));document.querySelectorAll('.nav [data-go]').forEach(b=>b.classList.toggle('selected',b.dataset.go===name));document.body.classList.toggle('maps-mode',name==='maps');window.scrollTo({top:0,behavior:'instant'});$('systemLog')&&($('systemLog').textContent='[NAV] Module opened: '+name.toUpperCase());if(name==='maps'){$('systemLog')&&($('systemLog').textContent='[MAPS] Adaptive full-screen viewport active. Map orientation remains upright.');}}
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.go)));
+
+function tick(){const d=new Date();$('clock').textContent=d.toLocaleTimeString('id-ID',{hour12:false});$('date').textContent=d.toLocaleDateString('id-ID',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});}
+tick();setInterval(tick,1000);
+function setDot(id,on){$(id).classList.toggle('ok',!!on)}
+function network(){const n=navigator.connection;$('netStatus').textContent=n?`Jaringan: ${n.effectiveType||n.type||'aktif'}${n.downlink?` · ${n.downlink} Mbps`:''}`:`Jaringan: ${navigator.onLine?'online':'offline'}`;$('connectionType').textContent=n?`${n.effectiveType||n.type||'Aktif'}${n.downlink?` · ${n.downlink} Mbps`:''}`:(navigator.onLine?'Online (detail dibatasi browser)':'Offline');setDot('netDot',navigator.onLine)}
+network();window.addEventListener('online',network);window.addEventListener('offline',network);if(navigator.connection)navigator.connection.addEventListener('change',network);
+if(navigator.getBattery){navigator.getBattery().then(b=>{const upd=()=>$('batteryStatus').textContent=`Baterai: ${Math.round(b.level*100)}%${b.charging?' · mengisi':''}`;upd();b.addEventListener('levelchange',upd);b.addEventListener('chargingchange',upd)}).catch(()=>{});}
+let watch=null,last=null,total=0,samples=[],max=0,startTime=null,durationTimer=null;
+function haversine(a,b){const R=6371e3,p=Math.PI/180,dLat=(b.latitude-a.latitude)*p,dLon=(b.longitude-a.longitude)*p;const x=Math.sin(dLat/2)**2+Math.cos(a.latitude*p)*Math.cos(b.latitude*p)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
+function gpsUpdate(pos){const c=pos.coords;let v=Number.isFinite(c.speed)&&c.speed>=0?c.speed*3.6:null;if(v===null&&last&&pos.timestamp>last.time){const dist=haversine(last.coords,c),secs=(pos.timestamp-last.time)/1000;if(secs>0&&dist<300)v=dist/secs*3.6}
+ if(v!==null){$('speedValue').textContent=Math.round(v);samples.push(v);if(samples.length>1000)samples.shift();max=Math.max(max,v);$('maxSpeed').textContent=max.toFixed(0)+' km/h';$('avgSpeed').textContent=(samples.reduce((a,b)=>a+b,0)/samples.length).toFixed(1)+' km/h';$('speedCaption').textContent='GPS atualizado';}
+ $('accuracy').textContent=c.accuracy?Math.round(c.accuracy)+' m':'--';$('coords').textContent=`${c.latitude.toFixed(4)}, ${c.longitude.toFixed(4)}`;$('gpsStatus').textContent='GPS: aktif';$('gpsHeader').textContent='GPS aktif';setDot('gpsDot',true);setDot('gpsDot2',true);
+ if(last){const delta=haversine(last.coords,c);if(delta<300)total+=delta;$('distance').textContent=(total/1000).toFixed(2)+' km';}
+ last={coords:c,time:pos.timestamp};
+}
+$('startGps').onclick=()=>{if(!navigator.geolocation){$('speedCaption').textContent='Browser tidak mendukung GPS';return;}if(watch!==null)return;watch=navigator.geolocation.watchPosition(gpsUpdate,e=>{$('gpsStatus').textContent='GPS: '+(e.code===1?'izin ditolak':'tidak tersedia');$('gpsHeader').textContent='GPS tidak tersedia';$('speedCaption').textContent=e.message;setDot('gpsDot',false);setDot('gpsDot2',false)}, {enableHighAccuracy:true,maximumAge:1000,timeout:15000});if(!startTime){startTime=Date.now();durationTimer=setInterval(()=>{const s=Math.floor((Date.now()-startTime)/1000);$('duration').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},1000);}};
+$('stopGps').onclick=()=>{if(watch!==null)navigator.geolocation.clearWatch(watch);watch=null;$('gpsStatus').textContent='GPS: dihentikan';$('gpsHeader').textContent='GPS berhenti';$('speedCaption').textContent='GPS dihentikan';$('speedValue').textContent='--';setDot('gpsDot',false);setDot('gpsDot2',false)};
+$('resetTrip').onclick=()=>{total=0;max=0;samples=[];last=null;startTime=null;if(durationTimer)clearInterval(durationTimer);$('duration').textContent='00:00';$('distance').textContent='0.00 km';$('avgSpeed').textContent='--';$('maxSpeed').textContent='--';$('speedValue').textContent='--';};
+function mapSearch(q){if(!q)return;const url='https://www.google.com/maps?q='+encodeURIComponent(q)+'&output=embed';$('map').src=url;$('destination').value=q;}
+$('searchMap').onclick=()=>mapSearch($('destination').value.trim());$('destination').addEventListener('keydown',e=>{if(e.key==='Enter')mapSearch($('destination').value.trim())});
+$('myLocation').onclick=()=>{if(!last){$('speedCaption').textContent='Aktifkan GPS terlebih dahulu';return;}mapSearch(last.coords.latitude+','+last.coords.longitude)};
+$('openMaps').onclick=()=>{const q=$('destination').value.trim();const url=q?'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(q)+'&travelmode=driving':last?'https://www.google.com/maps/dir/?api=1&destination='+last.coords.latitude+','+last.coords.longitude+'&travelmode=driving':'https://www.google.com/maps';window.location.href=url};
+// Terima tujuan dari Android intent/deep link yang diteruskan aplikasi pendamping.
+const incoming=new URLSearchParams(location.search);const incomingDest=incoming.get('destination')||incoming.get('q');const incomingGeo=incoming.get('geo');if(incomingDest){$('destination').value=incomingDest;mapSearch(incomingDest)}else if(incomingGeo){$('destination').value=incomingGeo;mapSearch(incomingGeo)}
+let stream=null;
+$('startShare').onclick=async()=>{if(!navigator.mediaDevices?.getDisplayMedia){alert('Screen capture tidak didukung browser ini. Coba browser desktop/Android yang kompatibel melalui HTTPS.');return;}try{stream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});$('screenPreview').srcObject=stream;$('mirrorStatus').textContent='Screen share: aktif (pratinjau lokal)';setDot('mirrorDot',true);$('stopShare').disabled=false;stream.getVideoTracks()[0].addEventListener('ended',stopShare)}catch(e){$('mirrorStatus').textContent='Screen share: tidak dimulai';alert('Screen share gagal: '+e.message)}};
+function stopShare(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}$('screenPreview').srcObject=null;$('mirrorStatus').textContent='Screen share: berhenti';setDot('mirrorDot',false);$('stopShare').disabled=true}
+$('stopShare').onclick=stopShare;
+function extractId(v){v=v.trim();if(/^[\w-]{11}$/.test(v))return v;try{const u=new URL(v);if(u.hostname.includes('youtu.be'))return u.pathname.slice(1,12);if(u.hostname.includes('youtube.com'))return u.searchParams.get('v')||u.pathname.split('/').filter(Boolean).pop()}catch(e){}return null}
+$('loadYoutube').onclick=()=>{const id=extractId($('youtubeInput').value);if(!id||!/^[\w-]{11}$/.test(id)){alert('Masukkan URL YouTube atau ID video yang valid.');return;}$('youtubePlayer').src='https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&rel=0'};
+$('openYoutube').onclick=()=>window.open('https://music.youtube.com/','_blank','noopener');
+// Mode layar: CSS fallback selalu tersedia; screen.orientation.lock bergantung dukungan browser/Android.
+let requestedOrientation='auto';function setOrientationMode(mode){requestedOrientation=mode;document.querySelectorAll('.orientation-actions button').forEach(b=>b.classList.remove('active'));const ids={auto:'autoOrientation',portrait:'portraitOrientation',landscape:'landscapeOrientation'};$(ids[mode]).classList.add('active');const preview=$('orientationPreview');preview.classList.toggle('portrait',mode==='portrait');preview.classList.toggle('landscape',mode==='landscape');preview.textContent=mode==='auto'?'Mode otomatis mengikuti orientasi perangkat':mode==='portrait'?'Mode berdiri · Portrait dipilih':'Mode miring · Landscape dipilih';$('orientationStatus').textContent=mode==='auto'?'Mode otomatis aktif. Tampilan menyesuaikan ukuran layar.':'Mode '+(mode==='portrait'?'portrait':'landscape')+' dipilih. Tekan Terapkan orientasi layar untuk mencoba mengunci rotasi perangkat.';}
+$('autoOrientation').onclick=()=>setOrientationMode('auto');$('portraitOrientation').onclick=()=>setOrientationMode('portrait');$('landscapeOrientation').onclick=()=>setOrientationMode('landscape');
+$('applyOrientation').onclick=async()=>{if(requestedOrientation==='auto'){try{if(screen.orientation?.unlock)screen.orientation.unlock();$('orientationStatus').textContent='Kunci orientasi dilepas; perangkat kembali mengatur orientasi otomatis.'}catch(e){$('orientationStatus').textContent='Mode otomatis dipilih.'}return;}try{if(!screen.orientation?.lock)throw new Error('API kunci orientasi tidak didukung browser ini.');await screen.orientation.lock(requestedOrientation);$('orientationStatus').textContent='Orientasi '+requestedOrientation+' berhasil diminta.'}catch(e){$('orientationStatus').textContent='Belum dapat mengunci orientasi: '+e.message+' Aktifkan layar penuh atau gunakan aplikasi Android pendamping.'}};
+$('fullscreenBtn').onclick=async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen();}catch(e){$('orientationStatus').textContent='Mode layar penuh tidak tersedia: '+e.message}};
+window.addEventListener('orientationchange',()=>{if(requestedOrientation==='auto')$('orientationPreview').textContent='Otomatis · '+(screen.orientation?.type||'orientasi perangkat')});
+$('checkNetwork').onclick=()=>{network();alert(navigator.onLine?'Perangkat terhubung ke jaringan. Detail WiFi dibatasi browser.':'Perangkat sedang offline.')};
+$('bluetoothBtn').onclick=async()=>{if(!navigator.bluetooth){alert('Web Bluetooth tidak tersedia pada browser/perangkat ini. Coba Chrome/Edge yang kompatibel, HTTPS, dan perangkat Bluetooth GATT.');return;}try{const d=await navigator.bluetooth.requestDevice({acceptAllDevices:true});alert('Perangkat dipilih: '+d.name+'. Koneksi layanan memerlukan profil GATT yang didukung.');}catch(e){if(e.name!=='NotFoundError')alert('Bluetooth: '+e.message)}};
+
+// ===== PRO MAX GPS + TRIP EXTENSIONS =====
+const TRIP_STORE_KEY='navixu3_trip_history_v2';
+const SPEED_LIMIT_KEY='navixu3_speed_limit_v1';
+let speedLimit=Number(localStorage.getItem(SPEED_LIMIT_KEY)||80);
+let alertWasTriggered=false;
+$('speedLimit').value=speedLimit;
+$('saveSpeedLimit').onclick=()=>{
+ const n=Number($('speedLimit').value);
+ if(!Number.isFinite(n)||n<5||n>200){$('speedAlertStatus').textContent='Masukkan 5–200 km/jam';return;}
+ speedLimit=n;localStorage.setItem(SPEED_LIMIT_KEY,String(n));alertWasTriggered=false;
+ $('speedAlertStatus').textContent='Batas aktif: '+n+' km/jam';
+};
+function renderTripHistory(){
+ let items=[];try{items=JSON.parse(localStorage.getItem(TRIP_STORE_KEY)||'[]')}catch(e){}
+ $('tripHistoryList').innerHTML=items.length?items.slice().reverse().map(x=>
+ `<div class="history-item"><div><strong>${new Date(x.date).toLocaleString('id-ID')}</strong><small>Durasi ${x.duration} · Maks ${x.max} km/jam</small></div><div>${x.distance} km</div></div>`
+ ).join(''):'Belum ada perjalanan tersimpan.';
+}
+renderTripHistory();
+$('saveTrip').onclick=()=>{
+ const record={date:new Date().toISOString(),distance:(total/1000).toFixed(2),duration:$('duration').textContent,max:Number(max||0),average:samples.length?(samples.reduce((a,b)=>a+b,0)/samples.length).toFixed(1):'0.0'};
+ let items=[];try{items=JSON.parse(localStorage.getItem(TRIP_STORE_KEY)||'[]')}catch(e){}
+ items.push(record);localStorage.setItem(TRIP_STORE_KEY,JSON.stringify(items.slice(-250)));renderTripHistory();
+ $('systemLog').textContent='[TRIP] Perjalanan berhasil disimpan ke perangkat.';
+};
+$('clearTrips').onclick=()=>{
+ if(!confirm('Hapus seluruh riwayat perjalanan tersimpan di perangkat ini?'))return;
+ localStorage.removeItem(TRIP_STORE_KEY);renderTripHistory();
+};
+$('exportTrips').onclick=()=>{
+ let items=[];try{items=JSON.parse(localStorage.getItem(TRIP_STORE_KEY)||'[]')}catch(e){}
+ if(!items.length){alert('Belum ada riwayat untuk diekspor.');return;}
+ const rows=[['Tanggal','Jarak km','Durasi','Maks km/jam','Rata-rata km/jam'],...items.map(x=>[x.date,x.distance,x.duration,x.max,x.average])];
+ const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+ const url=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));
+ const a=document.createElement('a');a.href=url;a.download='naviXU3-riwayat-perjalanan.csv';a.click();URL.revokeObjectURL(url);
+};
+$('mapFullscreen').onclick=async()=>{
+ document.body.classList.add('maps-mode');
+ try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen()}catch(e){}
+};
+$('exitMapFullscreen').onclick=async()=>{
+ document.body.classList.remove('maps-mode');
+ try{if(document.fullscreenElement)await document.exitFullscreen()}catch(e){}
+};
+document.addEventListener('fullscreenchange',()=>{
+ if(!document.fullscreenElement&&document.body.classList.contains('maps-mode'))document.body.classList.remove('maps-mode');
+ syncFullscreenExit();
+});
+function compassLabel(deg){
+ if(!Number.isFinite(deg))return '--';
+ return ['U','TL','T','TG','S','BD','B','BL'][Math.round(((deg%360)+360)%360/45)%8]+' · '+Math.round(deg)+'°';
+}
+window.addEventListener('deviceorientation',e=>{
+ const h=Number.isFinite(e.webkitCompassHeading)?e.webkitCompassHeading:(Number.isFinite(e.alpha)?(360-e.alpha):NaN);
+ if(Number.isFinite(h))$('heading').textContent=compassLabel(h);
+},{passive:true});
+const oldGpsUpdate=gpsUpdate;
+gpsUpdate=function(pos){
+ oldGpsUpdate(pos);
+ const c=pos.coords;
+ $('altitude').textContent=Number.isFinite(c.altitude)?Math.round(c.altitude)+' m':'--';
+ $('gpsQuality').textContent=c.accuracy<=10?'EXCELLENT':c.accuracy<=30?'GOOD':c.accuracy<=80?'FAIR':'WEAK';
+ $('mapGpsFix').textContent='LOCKED · '+Math.round(c.accuracy)+'M';
+ $('mapLinkStatus').textContent='GPS CONNECTED';
+ if(Number.isFinite(c.heading))$('heading').textContent=compassLabel(c.heading);
+ const v=Number.isFinite(c.speed)?c.speed*3.6:null;
+ if(v!==null&&v>speedLimit&&!alertWasTriggered){
+  alertWasTriggered=true;$('speedAlertStatus').textContent='Batas terlampaui · '+Math.round(v)+' km/jam';
+  if(navigator.vibrate)navigator.vibrate([120,70,120]);
+ }else if(v!==null&&v<=speedLimit){alertWasTriggered=false;$('speedAlertStatus').textContent='Normal · batas '+speedLimit+' km/jam';}
+};
+window.addEventListener('resize',()=>{document.documentElement.style.setProperty('--live-vh',(window.innerHeight*.01)+'px');});
+document.documentElement.style.setProperty('--live-vh',(window.innerHeight*.01)+'px');
+window.addEventListener('orientationchange',()=>{
+ $('mapOrientationStatus').textContent=(screen.orientation?.type||'AUTO').toUpperCase()+' / NORTH-UP';
+});
+$('mapOrientationStatus').textContent=(screen.orientation?.type||'AUTO').toUpperCase()+' / NORTH-UP';
+
+</script>
+</body></html>
